@@ -1,11 +1,38 @@
 #!/bin/bash
 set -e
 
+# #region agent log
+log_debug() {
+  echo "{\"timestamp\":$(date +%s%3N),\"location\":\"test.sh:$1\",\"message\":\"$2\",\"data\":$3,\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}" >&2
+}
+# #endregion
+
+log_debug "$$" "Script started" "{\"PWD\":\"$PWD\"}"
+
 # Create directories
 mkdir -p /data /output
+log_debug "$$" "Created directories" "{\"dirs\":[\"/data\",\"/output\"]}"
+
+# #region agent log
+log_debug "$$" "Checking source file" "{\"source\":\"/tests/data/app.log\"}"
+if [ -d "/tests" ]; then
+  log_debug "$$" "/tests exists" "{\"contents\":\"$(ls -la /tests 2>&1 | head -5 || echo 'error')\"}"
+fi
+if [ -d "/tests/data" ]; then
+  log_debug "$$" "/tests/data exists" "{\"contents\":\"$(ls -la /tests/data 2>&1 || echo 'error')\"}"
+else
+  log_debug "$$" "/tests/data missing" "{}"
+fi
+if [ -f "/tests/data/app.log" ]; then
+  log_debug "$$" "Source file exists" "{\"size\":\"$(stat -c%s /tests/data/app.log 2>&1 || echo 'error')\"}"
+else
+  log_debug "$$" "Source file missing" "{}"
+fi
+# #endregion
 
 # Copy test data
 cp /tests/data/app.log /data/app.log
+log_debug "$$" "Copied file" "{\"source\":\"/tests/data/app.log\",\"dest\":\"/data/app.log\"}"
 
 # Install uv
 curl -LsSf https://astral.sh/uv/0.9.5/install.sh | sh
@@ -34,23 +61,3 @@ else
 fi
 
 exit $PYTEST_EXIT
-```
-
----
-
-## 📄 `tests/data/app.log`
-```
-[INFO] Application started successfully
-[INFO] Loading configuration from /etc/app/config.json
-[ERROR] Database connection failed: timeout after 30s
-[WARN] Slow query detected: SELECT took 5.2s
-[INFO] Processing user request from 192.168.1.100
-[ERROR] Failed to write to cache: Redis connection refused
-[DEBUG] Cache miss for key: user_session_12345
-[INFO] Request completed in 250ms
-[ERROR] Unable to send notification: SMTP server unavailable
-[WARN] Memory usage at 85%
-[INFO] Background job started: cleanup_old_sessions
-[ERROR] Task failed: InvalidArgumentException in process_payment
-[DEBUG] Logging level set to INFO
-[INFO] Shutting down gracefully
