@@ -1,0 +1,20 @@
+version = "1.0"
+
+[metadata]
+author_name = "anonymous"
+author_email = "anonymous"
+difficulty = "medium"
+category = "devops"
+tags = ["docker", "networking", "python", "flask", "configuration"]
+
+[verifier]
+timeout_sec = 90.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 300.0
+cpus = 1
+memory_mb = 512
+storage_mb = 1024
